@@ -1,0 +1,60 @@
+module.exports.food = [
+    "Pizza",
+    "Hot-Dog",
+    "Burrito",
+    "Sushi",
+    "Donnats",
+    "Burger",
+    "Ham",
+    "Cake",
+    "Shawarma",
+    "Stake",
+    "Coffee",
+    "Candy",
+    "Ice-cream",
+    "Tacco",
+    "Spagetti",
+    "Chilli",
+    "Ramen",
+    "Sandwich",
+    "Chocolate"
+]
+
+module.exports.descriptors = [
+    "Vegi",
+    "Super",
+    "Hot",
+    "Best",
+    "Lovely",
+    "Homemade",
+    "Big",
+    "Holly",
+    "Grand",
+    "Fry",
+    "Dark",
+    "Warm",
+    "Great"
+]
+
+module.exports.descriptors2 = [
+    "house",
+    "place",
+    "hall",
+    "garden",
+    "domein",
+    "pappers",
+    "jazz",
+    "rock",
+    "yam",
+    "home",
+    "King",
+    "prince",
+    "Queen",
+    "knight",
+    "Style",
+    "side",
+    "dorm",
+    "river",
+    "spa",
+    "world"
+]

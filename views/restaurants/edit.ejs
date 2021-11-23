@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New</title>
+</head>
+
+<body>
+    <h1>
+        Edit <%= restaurant.title %>
+    </h1>
+    <form action="/restaurants/<%= restaurant._id %>?_method=PUT" method="POST">
+        <div>
+            <label for="title">Title</label>
+            <input type="text" id="title" value="<%= restaurant.title %>" name="restaurant[title]">
+        </div>
+        <div> <label for="image">Image</label>
+            <input type="text" id="image" value="<%= restaurant.image %>" name="restaurant[image]">
+        </div>
+        <div>
+            <label for="description">Description</label>
+            <textarea name="restaurant[description]" id="description" cols="30"
+                rows="10"><%= restaurant.description %></textarea>
+        </div>
+        <div>
+            <button>Edit</button>
+        </div>
+        <div><a href="/restaurants/<%= restaurant._id %>">Back</a></div>
+    </form>
+</body>
+
+</html>
