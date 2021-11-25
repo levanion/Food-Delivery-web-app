@@ -1,28 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-
-<body>
-    <h1>
-        <%= restaurant.title %>
-    </h1>
-    <div><img src="<%= restaurant.image %> " alt=""></div>
-    <h2>
-        <%= restaurant.description %>
-    </h2>
-    <div><a href="/restaurants/<%= restaurant._id %>/edit">Edit</a></div>
-    <div><a href="/restaurants">All restaurants</a></div>
-    <div>
-        <form action="/restaurants/<%= restaurant._id %>?_method=DELETE" method="POST">
-            <button>DELETE</button>
-        </form>
+<% layout("layouts/boilerplate")%>
+    <div class="card" style="width: 18rem;">
+        <img src="<%= restaurant.image %>" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">
+                <%= restaurant.title %>
+            </h5>
+            <p class="card-text">
+                <%= restaurant.description %>
+            </p>
+        </div>
+        <div class="card-body">
+            <a href="/restaurants/<%= restaurant._id %>/edit" class="card-link btn btn-info">Edit</a>
+            </button>
+            <form class="d-inline" action="/restaurants/<%= restaurant._id %>?_method=DELETE" method="POST">
+                <button class="card-link btn btn-danger">Delete</button>
+            </form>
+        </div>
     </div>
-</body>
-
-</html>
