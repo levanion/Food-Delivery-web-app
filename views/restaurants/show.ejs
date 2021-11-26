@@ -1,19 +1,85 @@
 <% layout("layouts/boilerplate")%>
-    <div class="card" style="width: 18rem;">
-        <img src="<%= restaurant.image %>" class="card-img-top" alt="...">
-        <div class="card-body">
-            <h5 class="card-title">
-                <%= restaurant.title %>
-            </h5>
-            <p class="card-text">
-                <%= restaurant.description %>
-            </p>
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <img src="<%= restaurant.image %>" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <%= restaurant.title %>
+                    </h5>
+                    <p class="card-text">
+                        <%= restaurant.description %>
+                    </p>
+                </div>
+                <div class="card-body">
+                    <a href="/restaurants/<%= restaurant._id %>/edit" class="card-link btn btn-info">Edit</a>
+                    </button>
+                    <form class="d-inline" action="/restaurants/<%= restaurant._id %>?_method=DELETE" method="POST">
+                        <button class="card-link btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <a href="/restaurants/<%= restaurant._id %>/edit" class="card-link btn btn-info">Edit</a>
-            </button>
-            <form class="d-inline" action="/restaurants/<%= restaurant._id %>?_method=DELETE" method="POST">
-                <button class="card-link btn btn-danger">Delete</button>
-            </form>
+
+        <div class="col-6">
+            <div class="mb-3">
+                <h2>Add Dish</h2>
+                <form action="/restaurants/<%= restaurant._id %>/dishes" method="POST" novalidate
+                    class="row g-3 validated-form">
+                    <div class="col-md-6">
+                        <label class="visually-hidden" for="title">Dish Title</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="title" name="dish[title]"
+                                placeholder="Dish Title" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="visually-hidden" for="price">Price</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="price" name="dish[price]" placeholder="Price $"
+                                required>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="visually-hidden" for="description">Description</label>
+                        <textarea class="form-control" name="dish[description]" id="description"
+                            placeholder="Description" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </div>
+                </form>
+            </div>
+            <div>
+                <h3 class="mb-3">
+                    Dishes Menu
+                </h3>
+            </div>
+
+            <div class="list-group">
+                <% for(let dish of restaurant.dish){ %>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= dish.title %>
+                            </h5>
+                            <p class="card-text">
+                                <%= dish.description %>
+                            </p>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                $<%= dish.price %>
+                            </li>
+                        </ul>
+                        <div class="card-body">
+                            <form action="/restaurants/<%= restaurant._id %>/dishes/<%= dish._id %>?_method=DELETE"
+                                method="POST">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    <% } %>
+            </div>
         </div>
     </div>

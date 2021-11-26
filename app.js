@@ -15,10 +15,11 @@ const multer = require("multer")
 const { storage } = require("./cloudinary");
 const upload = multer({ storage });
 
-const { validateRestaurant } = require("./middleware");
+const { validateRestaurant, validateDish } = require("./middleware");
 const catchAsync = require("./utils/catchAsync");
 
 const Restaurant = require("./models/restaurants");
+const Dish = require("./models/dish");
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/FoodDeliveryApp";
 
@@ -90,7 +91,7 @@ app.post("/restaurants", validateRestaurant, catchAsync(async (req, res) => {
 }))
 
 app.get("/restaurants/:id", catchAsync(async (req, res) => {
-    const restaurant = await Restaurant.findById(req.params.id)
+    const restaurant = await Restaurant.findById(req.params.id).populate("dish")
     res.render("restaurants/show", { restaurant })
 }))
 
@@ -113,6 +114,25 @@ app.delete("/restaurants/:id", catchAsync(async (req, res) => {
     await Restaurant.findByIdAndDelete(id);
     req.flash("success", "Restaurant was successfully deleted!");
     res.redirect("/restaurants")
+}))
+
+app.post("/restaurants/:id/dishes", validateDish, catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const restaurant = await Restaurant.findById(id);
+    const dish = new Dish(req.body.dish);
+    restaurant.dish.push(dish);
+    await dish.save();
+    await restaurant.save();
+    req.flash("success", "Dish added!");
+    res.redirect(`/restaurants/${id}`)
+}))
+
+app.delete("/restaurants/:id/dishes/:dishId", catchAsync(async (req, res) => {
+    const { id, dishId } = req.params;
+    await Restaurant.findByIdAndUpdate(id, { $pull: { dish: dishId } });
+    await Dish.findByIdAndDelete(dishId);
+    req.flash("success", "Dish was deleted!");
+    res.redirect(`/restaurants/${id}`)
 }))
 
 app.all("*", (req, res, next) => {

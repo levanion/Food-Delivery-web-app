@@ -32,3 +32,12 @@ module.exports.restaurantSchema = Joi.object({
     }).required()
 
 });
+
+module.exports.dishSchema = Joi.object({
+    dish: Joi.object({
+        title: Joi.string().required().escapeHTML(),
+        description: Joi.string().required().escapeHTML(),
+        price: Joi.number().required().min(0)
+    }).required()
+
+});
