@@ -1,0 +1,19 @@
+<% layout("layouts/boilerplate")%>
+    <h1>Orders List</h1>
+
+    <%for (orders of restaurant.order){ %>
+        <div class="card text-center mb-3">
+            <div class="card-header">
+                author
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Order</h5>
+                <!-- <p class="card-text">With supporting text below as a natural lead-in to additional content.</p> -->
+                <a href="/restaurants/<%= restaurant._id %>/orders/<%= orders._id %>"
+                    class="btn btn-primary">details</a>
+            </div>
+            <div class="card-footer text-muted">
+                <%= orders.date %>
+            </div>
+        </div>
+        <%} %>

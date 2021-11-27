@@ -1,0 +1,8 @@
+<% layout("layouts/boilerplate")%>
+    <h1>order</h1>
+
+    <%for(let dishes of order.dish){ %>
+        <h2>
+            <%= dishes.title %>
+        </h2>
+        <%} %>

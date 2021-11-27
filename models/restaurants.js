@@ -12,6 +12,12 @@ const RestaurantSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: "Dish"
         }
+    ],
+    order: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Order"
+        }
     ]
 })
 

@@ -20,6 +20,8 @@ const catchAsync = require("./utils/catchAsync");
 
 const Restaurant = require("./models/restaurants");
 const Dish = require("./models/dish");
+const Order = require("./models/order");
+const { findById } = require("./models/dish");
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/FoodDeliveryApp";
 
@@ -127,12 +129,50 @@ app.post("/restaurants/:id/dishes", validateDish, catchAsync(async (req, res) =>
     res.redirect(`/restaurants/${id}`)
 }))
 
+app.get("/restaurants/:id/dishesEdit", async (req, res) => {
+    const { id } = req.params;
+    const restaurant = await Restaurant.findById(id).populate("dish")
+    res.render("restaurants/dishesEdit", { restaurant })
+})
+
 app.delete("/restaurants/:id/dishes/:dishId", catchAsync(async (req, res) => {
     const { id, dishId } = req.params;
     await Restaurant.findByIdAndUpdate(id, { $pull: { dish: dishId } });
     await Dish.findByIdAndDelete(dishId);
     req.flash("success", "Dish was deleted!");
-    res.redirect(`/restaurants/${id}`)
+    res.redirect(`/restaurants/${id}/dishesEdit`)
+}))
+
+app.get("/restaurants/:id/orders", async (req, res) => {
+    const { id } = req.params;
+    const restaurant = await Restaurant.findById(id).populate("order")
+    res.render("restaurants/order", { restaurant })
+})
+
+app.get("/restaurants/:id/orders/:orderId", async (req, res) => {
+    const { id, orderId } = req.params;
+    // const restaurant = await Restaurant.findById(id).populate("order")
+    const order = await Order.findById(orderId).populate("dish")
+    res.render("restaurants/orderShow", { order })
+})
+
+app.post("/restaurants/:id/orders", catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const { dishes } = req.body
+    const order = new Order();
+    const restaurant = await Restaurant.findById(id)
+    restaurant.order.push(order);
+    await restaurant.save()
+    if (dishes.dish instanceof Array) {
+        for (let dish of dishes.dish) {
+            const dishes = await Dish.findById(dish)
+            order.dish.push(dishes)
+        } return await order.save() && res.redirect(`/restaurants/${id}/orders`)
+    }
+    const dish = await Dish.findById(dishes.dish)
+    order.dish.push(dish)
+    await order.save()
+    res.redirect(`/restaurants/${id}/orders`)
 }))
 
 app.all("*", (req, res, next) => {

@@ -50,36 +50,49 @@
                     </div>
                 </form>
             </div>
+
             <div>
                 <h3 class="mb-3">
                     Dishes Menu
+                    <a href="/restaurants/<%= restaurant._id %>/dishesEdit">Edit</a>
                 </h3>
             </div>
 
             <div class="list-group">
-                <% for(let dish of restaurant.dish){ %>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <%= dish.title %>
-                            </h5>
-                            <p class="card-text">
-                                <%= dish.description %>
-                            </p>
+                <form action="/restaurants/<%= restaurant._id %>/orders" method="POST">
+                    <% for(let dish of restaurant.dish){ %>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= dish.title %>
+                                </h5>
+                                <p class="card-text">
+                                    <%= dish.description %>
+                                </p>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    $<%= dish.price %>
+                                </li>
+                            </ul>
+                            <div class="card-body">
+                                <input class="form-check-input me-1" name="dishes[dish]" type="checkbox"
+                                    value="<%= dish._id %>">
+                                Add
+                            </div>
                         </div>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">
-                                $<%= dish.price %>
-                            </li>
-                        </ul>
-                        <div class="card-body">
-                            <form action="/restaurants/<%= restaurant._id %>/dishes/<%= dish._id %>?_method=DELETE"
-                                method="POST">
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                    <% } %>
+                        <% } %>
+                            <button>Make an Order</button>
+                </form>
             </div>
+
+
         </div>
+    </div>
+
+    <div class="list-group">
+        <label class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="">
+            First checkbox
+        </label>
     </div>
