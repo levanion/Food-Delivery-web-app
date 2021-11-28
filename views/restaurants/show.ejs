@@ -76,9 +76,14 @@
                                 </li>
                             </ul>
                             <div class="card-body">
-                                <input class="form-check-input me-1" name="dishes[dish]" type="checkbox"
-                                    value="<%= dish._id %>">
-                                Add
+                                <label>
+                                    <input type="number" min="1" name="dishes[quantity]" value="1">
+                                </label>
+                                <label>
+                                    <input class="form-check-input me-1" name="dishes[dish]" type="checkbox"
+                                        value="<%= dish._id %>">
+                                    Add
+                                </label>
                             </div>
                         </div>
                         <% } %>

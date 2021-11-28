@@ -4,19 +4,15 @@ const Schema = mongoose.Schema;
 
 const OrderSchema = new Schema(
     {
-        // date: {
-        //     type: Date,
-        //     populate: new Date()
-        // },
-        // date: new Date(),
-        sumPrice: Number,
+        sumPrice: [Number],
         dish: [
             {
                 type: Schema.Types.ObjectId,
                 ref: "Dish"
             }
         ]
-    }
+    },
+    { timestamps: true }
 )
 
 module.exports = mongoose.model("Order", OrderSchema)

@@ -159,6 +159,7 @@ app.get("/restaurants/:id/orders/:orderId", async (req, res) => {
 app.post("/restaurants/:id/orders", catchAsync(async (req, res) => {
     const { id } = req.params;
     const { dishes } = req.body
+    console.log(dishes.quantity)
     const order = new Order();
     const restaurant = await Restaurant.findById(id)
     restaurant.order.push(order);
@@ -172,6 +173,7 @@ app.post("/restaurants/:id/orders", catchAsync(async (req, res) => {
     const dish = await Dish.findById(dishes.dish)
     order.dish.push(dish)
     await order.save()
+    // console.log(order.createdAt.getFullYear() + "-" + (order.createdAt.getMonth() + 1) + "-" + order.createdAt.getDate() + " " + order.createdAt.getHours() + ":" + order.createdAt.getMinutes() + ":" + order.createdAt.getSeconds())
     res.redirect(`/restaurants/${id}/orders`)
 }))
 
