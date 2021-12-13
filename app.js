@@ -10,18 +10,25 @@ const ExpressError = require("./utils/ExpressError");
 const methodOverride = require("method-override");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
 
-const multer = require("multer")
-const { storage } = require("./cloudinary");
-const upload = multer({ storage });
+const restaurantRoutes = require("./routes/restaurants");
+const dishRoutes = require("./routes/dishes");
+const orderRoutes = require("./routes/orders")
+const userRoutes = require("./routes/users")
+const blockedUserRoutes = require("./routes/blockedUsers")
 
-const { validateRestaurant, validateDish } = require("./middleware");
+const { isLoggedIn } = require("./middleware");
 const catchAsync = require("./utils/catchAsync");
 
 const Restaurant = require("./models/restaurants");
-const Dish = require("./models/dish");
 const Order = require("./models/order");
-const { findById } = require("./models/dish");
+
+const MongoStore = require("connect-mongo");
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/FoodDeliveryApp";
 
@@ -47,10 +54,22 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(mongoSanitize());
 
 const secret = process.env.SECRET || "somehowsecret";
 
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    secret: secret,
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
+
 const sessionConfig = {
+    store,
     name: "session",
     secret: secret,
     resave: false,
@@ -64,117 +83,77 @@ const sessionConfig = {
 }
 app.use(session(sessionConfig));
 app.use(flash());
+app.use(helmet());
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://cdn.jsdelivr.net"
+]
+
+const styleSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://cdn.jsdelivr.net"
+]
+
+const fontSrcUrls = [];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'"],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/dxvj5qvb2/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
-    // res.locals.currentUser = req.user;
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
 })
 
+app.use("/restaurants", restaurantRoutes);
+app.use("/restaurants/:id/dishes", dishRoutes);
+app.use("/restaurants/:id/orders", orderRoutes);
+app.use("/restaurants/:id/blockedUsers", blockedUserRoutes);
+app.use("/", userRoutes);
+
 app.get("/", (req, res) => {
-    res.send("priti nais")
+    res.render("home")
 })
 
-app.get("/restaurants", catchAsync(async (req, res) => {
-    const restaurants = await Restaurant.find({})
-    res.render("restaurants/index", { restaurants })
+app.get("/myOrders", isLoggedIn, catchAsync(async (req, res) => {
+    const { id } = req.user
+    const orders = await Order.find({ author: id }).populate("dish").populate("author").populate("restaurant")
+    res.render("myPage/myOrders", { orders })
 }))
 
-app.get("/restaurants/new", (req, res) => {
-    res.render("restaurants/new")
-})
+app.get("/myRestaurant", isLoggedIn, catchAsync(async (req, res) => {
+    const { id } = req.user
+    const restaurants = await Restaurant.find({ author: id }).populate("dish").populate("author")
+    res.render("myPage/myRestaurant", { restaurants })
 
-app.post("/restaurants", validateRestaurant, catchAsync(async (req, res) => {
-    const restaurant = new Restaurant(req.body.restaurant);
-    await restaurant.save()
-    req.flash("success", "Successfully made a new Restaurant!");
-    res.redirect(`/restaurants/${restaurant._id}`)
-}))
-
-app.get("/restaurants/:id", catchAsync(async (req, res) => {
-    const restaurant = await Restaurant.findById(req.params.id).populate("dish")
-    res.render("restaurants/show", { restaurant })
-}))
-
-app.get("/restaurants/:id/edit", catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const restaurant = await Restaurant.findById(id)
-    res.render("restaurants/edit", { restaurant })
-}))
-
-app.put("/restaurants/:id", validateRestaurant, catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const restaurant = await Restaurant.findByIdAndUpdate(id, { ...req.body.restaurant });
-    await restaurant.save();
-    req.flash("success", "Successfully edited Restaurant!");
-    res.redirect(`/restaurants/${restaurant._id}`)
-}))
-
-app.delete("/restaurants/:id", catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Restaurant.findByIdAndDelete(id);
-    req.flash("success", "Restaurant was successfully deleted!");
-    res.redirect("/restaurants")
-}))
-
-app.post("/restaurants/:id/dishes", validateDish, catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const restaurant = await Restaurant.findById(id);
-    const dish = new Dish(req.body.dish);
-    restaurant.dish.push(dish);
-    await dish.save();
-    await restaurant.save();
-    req.flash("success", "Dish added!");
-    res.redirect(`/restaurants/${id}`)
-}))
-
-app.get("/restaurants/:id/dishesEdit", async (req, res) => {
-    const { id } = req.params;
-    const restaurant = await Restaurant.findById(id).populate("dish")
-    res.render("restaurants/dishesEdit", { restaurant })
-})
-
-app.delete("/restaurants/:id/dishes/:dishId", catchAsync(async (req, res) => {
-    const { id, dishId } = req.params;
-    await Restaurant.findByIdAndUpdate(id, { $pull: { dish: dishId } });
-    await Dish.findByIdAndDelete(dishId);
-    req.flash("success", "Dish was deleted!");
-    res.redirect(`/restaurants/${id}/dishesEdit`)
-}))
-
-app.get("/restaurants/:id/orders", async (req, res) => {
-    const { id } = req.params;
-    const restaurant = await Restaurant.findById(id).populate("order")
-    res.render("restaurants/order", { restaurant })
-})
-
-app.get("/restaurants/:id/orders/:orderId", async (req, res) => {
-    const { id, orderId } = req.params;
-    // const restaurant = await Restaurant.findById(id).populate("order")
-    const order = await Order.findById(orderId).populate("dish")
-    res.render("restaurants/orderShow", { order })
-})
-
-app.post("/restaurants/:id/orders", catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const { dishes } = req.body
-    console.log(dishes.quantity)
-    const order = new Order();
-    const restaurant = await Restaurant.findById(id)
-    restaurant.order.push(order);
-    await restaurant.save()
-    if (dishes.dish instanceof Array) {
-        for (let dish of dishes.dish) {
-            const dishes = await Dish.findById(dish)
-            order.dish.push(dishes)
-        } return await order.save() && res.redirect(`/restaurants/${id}/orders`)
-    }
-    const dish = await Dish.findById(dishes.dish)
-    order.dish.push(dish)
-    await order.save()
-    // console.log(order.createdAt.getFullYear() + "-" + (order.createdAt.getMonth() + 1) + "-" + order.createdAt.getDate() + " " + order.createdAt.getHours() + ":" + order.createdAt.getMinutes() + ":" + order.createdAt.getSeconds())
-    res.redirect(`/restaurants/${id}/orders`)
 }))
 
 app.all("*", (req, res, next) => {

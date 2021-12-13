@@ -1,0 +1,41 @@
+<% layout("layouts/boilerplate")%>
+
+    <div class="container">
+        <h5> <a class="btn btn-secondary" href="/restaurants/<%= restaurant._id  %>">Back</a>
+            <%= restaurant.title %> Orders:
+
+        </h5>
+        <div class="d-flex flex-column-reverse">
+            <% restaurant.order.forEach((order)=>{ %>
+                <div class="card text-center mb-3 border border-warning">
+                    <div class="card-header bg-dark">
+                        <h5 class="text-light">
+                            <% if(restaurant.blockedUsers.includes(order.author._id)){ %>
+                                <div class="text-danger">
+                                    User: <%= order.author.username %> Blocked!
+                                </div>
+                                <% } else{ %>
+                                    User: <%= order.author.username %>
+                                        <% } %>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <h5 class="card-title">
+                                    <span class="badge rounded-pill text-dark bg-warning">
+                                        <%= order.status %> Order
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="col-4 text-secondary">
+                                <%= order.date %>
+                            </div>
+                            <div class="col-4"> <a href="/restaurants/<%= restaurant._id %>/orders/<%= order._id %>"
+                                    class="btn text-info"><strong>Details</strong></a></div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+        </div>
+    </div>

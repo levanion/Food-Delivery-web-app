@@ -3,16 +3,15 @@
         <h1 class="text-center">Edit Restaurant</h1>
         <div class="col-md-6 offset-md-3">
             <form action="/restaurants/<%= restaurant._id %>?_method=PUT" method="POST" novalidate
-                class="validated-form">
+                class="validated-form" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label" for="title">Title</label>
                     <input class="form-control" type="text" id="title" value="<%= restaurant.title %>"
                         name="restaurant[title]" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="image">Image</label>
-                    <input class="form-control" type="text" id="image" value="<%= restaurant.image %>"
-                        name="restaurant[image]" required>
+                    <label class="form-label" for="image">Add Images</label>
+                    <input type="file" name="image" id="image" class="form-control" multiple>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
@@ -23,6 +22,16 @@
                     </div>
                 </div>
                 <div>
+                    <div class="mb-3">
+                        <% restaurant.images.forEach(function(img, i ){ %>
+                            <img src="<%=img.thumbnail %>" class="img-thumbnail" alt="">
+                            <div class="form-check-inline">
+                                <input type="checkbox" id="image-<%= i %>" name="deleteImages[]"
+                                    value="<%= img.filename %>">
+                            </div>
+                            <label for="image-<%= i %>">Delete?</label>
+                            <% }) %>
+                    </div>
                     <button class="btn btn-success">Edit</button>
                     <a class="btn btn-secondary" href="/restaurants/<%= restaurant._id %>">Back</a>
                 </div>

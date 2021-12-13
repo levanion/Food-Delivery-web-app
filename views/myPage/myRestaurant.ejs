@@ -1,0 +1,29 @@
+<% layout("layouts/boilerplate")%>
+    <style>
+        .card-img-top {
+            width: 100%;
+            height: 15vw;
+            object-fit: cover;
+        }
+    </style>
+    <h5>My Restaurants</h5>
+    <div class="row">
+        <% for(restaurant of restaurants){%>
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                <div class="card rounded">
+                    <% if(restaurant.images.length) {%>
+                        <img class="img-fluid card-img-top " src="<%= restaurant.images[0].url %>" alt="">
+                        <% } else {%>
+                            <img class="img-fluid card-img-top"
+                                src="https://res.cloudinary.com/dxvj5qvb2/image/upload/v1638717234/FoodDelivery/mppqnrqpguvwtsxoceu3.jpg"
+                                alt="">
+                            <% } %>
+                                <div class="d-grid">
+                                    <a href="/restaurants/<%= restaurant._id %>" class="btn btn-warning text-dark">
+                                        <%= restaurant.title %>
+                                    </a>
+                                </div>
+                </div>
+            </div>
+            <% } %>
+    </div>

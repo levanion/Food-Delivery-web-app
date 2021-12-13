@@ -26,11 +26,9 @@ const Joi = BaseJoi.extend(extension);
 module.exports.restaurantSchema = Joi.object({
     restaurant: Joi.object({
         title: Joi.string().required().escapeHTML(),
-        description: Joi.string().required().escapeHTML(),
-        image: Joi.string().required()
-
-    }).required()
-
+        description: Joi.string().required().escapeHTML()
+    }).required(),
+    deleteImages: Joi.array()
 });
 
 module.exports.dishSchema = Joi.object({
@@ -39,5 +37,5 @@ module.exports.dishSchema = Joi.object({
         description: Joi.string().required().escapeHTML(),
         price: Joi.number().required().min(0)
     }).required()
-
 });
+

@@ -1,0 +1,33 @@
+<% layout("layouts/boilerplate")%>
+    <div class="container">
+        <h5>My Orders</h5>
+        <div class="d-flex flex-column-reverse">
+            <% orders.forEach((order)=>{ %>
+                <div class="card text-center mb-3 border border-warning">
+                    <div class="card-header bg-dark">
+                        <h5>
+                            <a class="text-light" href="/restaurants/<%= order.restaurant._id %> ">Restaurant: <%=
+                                    order.restaurant.title %></a>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <h5 class="card-title">
+                                    <span class="badge rounded-pill text-dark bg-warning">
+                                        <%= order.status %> Order
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="col-4 text-secondary">
+                                <%= order.date %>
+                            </div>
+                            <div class="col-4"> <a
+                                    href="/restaurants/<%= order.restaurant._id %>/orders/<%= order._id %>"
+                                    class="btn text-info"><strong>Details</strong></a></div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+        </div>
+    </div>

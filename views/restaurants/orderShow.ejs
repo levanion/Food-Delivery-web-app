@@ -1,8 +1,190 @@
 <% layout("layouts/boilerplate")%>
-    <h1>order</h1>
+    <div class="container">
+        <h5>
+            <% if(currentUser && currentUser.equals(restaurant.author)) { %>
+                User: <%= order.author.username %>
+                    <% if(restaurant.blockedUsers.includes(order.author._id)){ %>
+                        <div class="text-danger">Blocked!</div>
+                        <% } else{ %>
+                            <form action="/restaurants/<%= restaurant._id %>/blockedUsers" method="POST">
+                                <button class="btn btn-dark btn-sm text-light" name="blocked"
+                                    value="<%= order.author._id %>">Block
+                                    User</button>
+                            </form>
+                            <% } %>
+                                <% } else{%>
+                                    <h4>Restaurant: <a href="/restaurants/<%= restaurant._id %>">
+                                            <%=restaurant.title %>
+                                        </a></h4>
+                                    <% } %>
+        </h5>
+        <div class="row">
+            <div class="col-8">
+                <h5>
+                    Total Price: $<%= order.sumPrice %>
+                </h5>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">quantity</th>
+                                    <th scope="col">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% let i=0 %>
+                                    <%for(let dish of order.dish){ %>
+                                        <tr>
+                                            <td>
+                                                <%= dish.title %>
+                                            </td>
+                                            <td>
+                                                $<%= dish.price %>
+                                            </td>
+                                            <td>
+                                                x<%= order.quantity[i] %>
+                                            </td>
+                                            <td>
+                                                $<%- (parseFloat(dish.price) * parseInt(order.quantity[i])).toFixed(2)
+                                                    %>
+                                            </td>
+                                        </tr>
+                                        <% i=i + 1 %>
+                                            <%} %>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>
+                                                        <strong> = $<%= order.sumPrice %></strong>
+                                                    </td>
+                                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row">
+                            <% if(currentUser && currentUser.equals(order.author)) { %>
+                                <div>
+                                    <% if( order.status==="delivered" ){ %>
+                                        <div class="col-3">
+                                            <form
+                                                action="/restaurants/<%= restaurant._id %>/orders/<%= order._id  %>?_method=PUT"
+                                                method="POST">
+                                                <button class="btn btn-success" name="order[status]"
+                                                    value="Recieved">Mark as Recieved</button>
+                                            </form>
+                                        </div>
+                                        <% } %>
+                                </div>
+                                <div>
+                                    <% if(order.status==="New" ){ %>
+                                        <div class="col-3">
+                                            <form
+                                                action="/restaurants/<%= restaurant._id %>/orders/<%= order._id  %>?_method=PUT"
+                                                method="POST">
+                                                <button class="btn btn-danger" name="order[status]"
+                                                    value="Canceled">Cancel the order</button>
+                                            </form>
+                                        </div>
+                                        <% } %>
+                                </div>
+                                <% } %>
+                        </div>
+                    </div>
+                </div>
 
-    <%for(let dishes of order.dish){ %>
-        <h2>
-            <%= dishes.title %>
-        </h2>
-        <%} %>
+            </div>
+
+            <div class="col-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h4>
+                            Status: <span class="badge rounded-pill text-dark bg-warning"> Order is <%= order.status %>
+                            </span>
+                        </h4>
+                        <div class="row mb-3">
+                            <% if(currentUser && currentUser.equals(restaurant.author)) { %>
+                                <div>
+                                    <% if( order.status==="New" ){ %>
+                                        <div class="col-8">
+                                            <form
+                                                action="/restaurants/<%= restaurant._id %>/orders/<%= order._id  %>?_method=PUT"
+                                                method="POST">
+                                                <button class="btn btn-primary" name="order[status]"
+                                                    value="in the process of preparation">in the process of
+                                                    preparation</button>
+                                            </form>
+                                        </div>
+                                        <% } %>
+                                </div>
+                                <div>
+                                    <% if( order.status==="in the process of preparation" ){ %>
+                                        <div class="col-8">
+                                            <form
+                                                action="/restaurants/<%= restaurant._id %>/orders/<%= order._id  %>?_method=PUT"
+                                                method="POST">
+                                                <button class="btn btn-primary" name="order[status]"
+                                                    value="on the way">on the
+                                                    way</button>
+                                            </form>
+                                        </div>
+                                        <% } %>
+                                </div>
+                                <div>
+                                    <% if( order.status==="on the way" ){ %>
+                                        <div class="col-8">
+                                            <form
+                                                action="/restaurants/<%= restaurant._id %>/orders/<%= order._id  %>?_method=PUT"
+                                                method="POST">
+                                                <button class="btn btn-primary" name="order[status]"
+                                                    value="delivered">delivered</button>
+                                            </form>
+                                        </div>
+                                        <% } %>
+                                </div>
+                                <% } %>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+                    <div>
+                        <h5>Status History:</h5>
+                        <% let j=0 %>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6"><strong>New Order</strong></div>
+                                        <div class="col-6">
+                                            <strong>
+                                                <%= order.date %>
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <% for(let history of order.statusHistory.status){ %>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <%= history %>
+                                            </div>
+                                            <div class="col-6">
+                                                <%= order.statusHistory.date[j] %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% j=j+1 %>
+                                    <% } %>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>

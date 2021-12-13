@@ -1,103 +1,287 @@
 <% layout("layouts/boilerplate")%>
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <img src="<%= restaurant.image %>" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <%= restaurant.title %>
-                    </h5>
-                    <p class="card-text">
-                        <%= restaurant.description %>
-                    </p>
+    <div class="container">
+        <div class="row">
+            <div class="col-8">
+                <div class="card mb-3 bg-warning">
+                    <div id="campgroundCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <% restaurant.images.forEach((img, i)=> { %>
+                                <div class="carousel-item <%= i === 0 ? " active" : "" %> ">
+                                    <img src="<%= img.url %>" class="d-block w-100" alt="...">
+                                </div>
+                                <% }) %>
+                        </div>
+                        <% if(restaurant.images.length> 1) {%>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#campgroundCarousel"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#campgroundCarousel"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                            <% }%>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <%= restaurant.title %>
+                        </h5>
+                        <p class="card-text">
+                            <%= restaurant.description %>
+                        </p>
+                        <p class="card-text">
+                            <strong>Owner: </strong>
+                            <%= restaurant.author.username %>
+                        </p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <a href="/restaurants/<%= restaurant._id %>/edit" class="card-link btn btn-info">Edit</a>
-                    </button>
-                    <form class="d-inline" action="/restaurants/<%= restaurant._id %>?_method=DELETE" method="POST">
-                        <button class="card-link btn btn-danger">Delete</button>
+
+                <% if(currentUser && restaurant.author.equals(currentUser._id)){ %>
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col align-self-center">
+                                <div class="card bg-warning">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-grid">
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#addDishModal">
+                                                Add Dish
+                                            </button>
+                                        </li>
+                                        <li class="list-group-item d-grid">
+                                            <a class="btn btn-secondary"
+                                                href="/restaurants/<%= restaurant._id %>/orders">Orders</a>
+                                        </li>
+                                        <li class="list-group-item d-grid">
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#blockedUsers">
+                                                Blocked Users
+                                            </button>
+                                        </li>
+                                        <li class="list-group-item d-grid">
+                                            <a href="/restaurants/<%= restaurant._id %>/edit"
+                                                class="card-link btn btn-secondary">Edit Restaurant</a>
+                                        </li>
+                                        <li class="list-group-item ">
+                                            <form class="d-grid"
+                                                action="/restaurants/<%= restaurant._id %>?_method=DELETE"
+                                                method="POST">
+                                                <button class="card-link btn btn-danger">Delete Restaurant</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <% } %>
+            </div>
+
+            <div class="col-4">
+                <div class="list-group">
+                    <h3 class="mb-3">
+                        FOOD MENU
+                    </h3>
+                    <% if(currentUser && !restaurant.author.equals(currentUser._id)){ %>
+                        <div class="d-grid mb-1">
+                            <!-- Button trigger modal --> <button type="button" class="btn btn-primary"
+                                data-bs-toggle="modal" data-bs-target="#orderModal">
+                                Make an order
+                            </button>
+                        </div>
+                        <% } %>
+                            <% for(let dish of restaurant.dish){ %>
+                                <div class="border border-dark rounded mb-1">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <%= dish.title %>
+                                            </h5>
+                                            <p class="card-text text-secondary">
+                                                <i>
+                                                    <%= dish.description %>
+                                                </i>
+                                            </p>
+                                        </div>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">
+                                                $<%= dish.price %>
+                                            </li>
+                                        </ul>
+                                        <% if(currentUser && restaurant.author.equals(currentUser._id)){ %>
+                                            <a class="btn btn-secondary"
+                                                href="/restaurants/<%= restaurant._id %>/dishes/<%= dish._id  %>">Edit</a>
+                                            <% } %>
+                                    </div>
+                                </div>
+
+                                <% } %>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Modal -->
+        <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="/restaurants/<%= restaurant._id %>/orders" method="POST">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="orderModalLabel">Choose from Menu</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="list-group">
+                                <input type="number" name="dishes[quantity]" style="display: none;">
+                                <% for(let dish of restaurant.dish){ %>
+                                    <div class="border border-dark rounded mb-1">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <%= dish.title %>
+                                                </h5>
+                                                <p class="card-text">
+                                                    <%= dish.description %>
+                                                </p>
+                                            </div>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item">
+                                                    $<%= dish.price %>
+                                                </li>
+                                            </ul>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-2">
+                                                        <label>
+                                                            <input onclick="change(this.value)" class="form-check-input"
+                                                                name="dishes[dish]" type="checkbox"
+                                                                value="<%= dish._id %>">
+                                                            Add
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-10">
+                                                        <label>
+                                                            <input style="display: none;" id="change<%= dish._id %>"
+                                                                type="number" min="1" name="dishes[quantity]" value="">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button class="btn btn-primary" type="submit" name="submit" value="Submit">Order</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-6">
-            <div class="mb-3">
-                <h2>Add Dish</h2>
-                <form action="/restaurants/<%= restaurant._id %>/dishes" method="POST" novalidate
-                    class="row g-3 validated-form">
-                    <div class="col-md-6">
-                        <label class="visually-hidden" for="title">Dish Title</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="title" name="dish[title]"
-                                placeholder="Dish Title" required>
-                        </div>
+        <!-- Add dish Modal -->
+        <div class="modal fade" id="addDishModal" tabindex="-1" aria-labelledby="addDishModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addDishModalLabel">Add Dish</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="col-md-6">
-                        <label class="visually-hidden" for="price">Price</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="price" name="dish[price]" placeholder="Price $"
-                                required>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <label class="visually-hidden" for="description">Description</label>
-                        <textarea class="form-control" name="dish[description]" id="description"
-                            placeholder="Description" required></textarea>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Add</button>
-                    </div>
-                </form>
-            </div>
-
-            <div>
-                <h3 class="mb-3">
-                    Dishes Menu
-                    <a href="/restaurants/<%= restaurant._id %>/dishesEdit">Edit</a>
-                </h3>
-            </div>
-
-            <div class="list-group">
-                <form action="/restaurants/<%= restaurant._id %>/orders" method="POST">
-                    <% for(let dish of restaurant.dish){ %>
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <%= dish.title %>
-                                </h5>
-                                <p class="card-text">
-                                    <%= dish.description %>
-                                </p>
+                    <div class="modal-body">
+                        <form action="/restaurants/<%= restaurant._id %>/dishes" method="POST" novalidate
+                            class="row g-3 validated-form form-floating mb-3">
+                            <div class="col-md-6">
+                                <label class="visually-hidden" for="title">Dish Title</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="title" name="dish[title]"
+                                        placeholder="Dish Title" required>
+                                </div>
                             </div>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">
-                                    $<%= dish.price %>
-                                </li>
-                            </ul>
-                            <div class="card-body">
-                                <label>
-                                    <input type="number" min="1" name="dishes[quantity]" value="1">
-                                </label>
-                                <label>
-                                    <input class="form-check-input me-1" name="dishes[dish]" type="checkbox"
-                                        value="<%= dish._id %>">
-                                    Add
-                                </label>
+                            <div class="col-md-6">
+                                <label class="visually-hidden" for="price">Price</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="price" name="dish[price]"
+                                        placeholder="Price $" required>
+                                </div>
                             </div>
-                        </div>
-                        <% } %>
-                            <button>Make an Order</button>
-                </form>
+                            <div class="col-12">
+                                <label class="visually-hidden" for="description">Description</label>
+                                <textarea class="form-control" name="dish[description]" id="description"
+                                    placeholder="Description" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Add</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-
         </div>
+
+        <!-- Blocked Users Modal -->
+        <div class="modal fade" id="blockedUsers" tabindex="-1" aria-labelledby="blockedUsersLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="blockedUsersLabel">Blocked Users</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">User</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(let blockedUser of restaurant.blockedUsers){ %>
+                                    <tr>
+
+                                        <td>
+                                            <%=blockedUser.username %>
+                                        </td>
+                                        <td>
+                                            <form action="/restaurants/<%= restaurant._id %>/blockedUsers?_method=PUT"
+                                                method="POST">
+                                                <button class="btn btn-success text-light btn-sm" name="blocked"
+                                                    value="<%= blockedUser._id %>">Unblock
+                                                    User</button>
+                                            </form>
+                                        </td>
+
+                                    </tr>
+                                    <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="list-group">
-        <label class="list-group-item">
-            <input class="form-check-input me-1" type="checkbox" value="">
-            First checkbox
-        </label>
-    </div>
+
+
+    <script>
+        function change(id) {
+            const input = document.getElementById(`change${id}`)
+            if (input.value === "") {
+                input.value = "1"; input.style.display = ""
+            } else if (input.value !== "") {
+                input.style.display = "none"; input.value = ""
+            }
+        }
+    </script>

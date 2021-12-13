@@ -1,0 +1,34 @@
+<% layout("layouts/boilerplate")%>
+
+    <h4>Edit Dish</h4>
+    <form action="/restaurants/<%= restaurant._id %>/dishes/<%= dish._id %>?_method=PUT" method="POST" novalidate
+        class="row g-3 validated-form form-floating mb-3">
+        <div class="col-md-6">
+            <label for="title">Dish Title</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="title" name="dish[title]" value="<%= dish.title %>"
+                    required>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="price">Price $</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="price" name="dish[price]" value="<%= dish.price %>"
+                    required>
+            </div>
+        </div>
+        <div class="col-12">
+            <label for="description">Description</label>
+            <textarea class="form-control" name="dish[description]" id="description"
+                required><%= dish.description %></textarea>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-secondary" href="/restaurants/<%= restaurant._id %>">Back</a>
+        </div>
+    </form>
+    <div>
+        <form action="/restaurants/<%= restaurant._id %>/dishes/<%= dish._id %>?_method=DELETE" method="POST">
+            <button class="btn btn-sm btn-danger">Delete Dish</button>
+        </form>
+    </div>
