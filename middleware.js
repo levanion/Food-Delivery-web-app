@@ -160,6 +160,16 @@ module.exports.notBlocked = async (req, res, next) => {
     }
 }
 
+module.exports.alreadyHasRestaurant = async (req, res, next) => {
+    const restaurants = await Restaurant.find({ author: req.user._id })
+    if (restaurants.length >= 1) {
+        req.flash("error", "You already have a restaurant!");
+        return res.redirect(`/restaurants`);
+    } else {
+        next()
+    }
+}
+
 
 
 

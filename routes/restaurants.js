@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const catchAsync = require("../utils/catchAsync");
-const { isLoggedIn, validateRestaurant, isAuthor } = require("../middleware");
+const { isLoggedIn, validateRestaurant, isAuthor, alreadyHasRestaurant } = require("../middleware");
 const multer = require("multer");
 const { storage } = require("../cloudinary");
 const upload = multer({ storage });
@@ -13,7 +13,7 @@ router.route("/")
         const restaurants = await Restaurant.find({})
         res.render("restaurants/index", { restaurants })
     }))
-    .post(isLoggedIn, upload.array("image"), validateRestaurant, catchAsync(async (req, res) => {
+    .post(isLoggedIn, alreadyHasRestaurant, upload.array("image"), validateRestaurant, catchAsync(async (req, res) => {
         const restaurant = new Restaurant(req.body.restaurant);
         restaurant.images = req.files.map(f => ({ url: f.path, filename: f.filename }));
         restaurant.author = req.user._id
