@@ -111,6 +111,7 @@ app.use(
                 "data:",
                 "https://res.cloudinary.com/dxvj5qvb2/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
                 "https://images.unsplash.com/",
+                "https://washingtonsources.org/wp-content/uploads/2021/06/Fast-Food-Companies-Are-Targeting-The-Youth-With-More-Ads.jpg"
             ],
             fontSrc: ["'self'", ...fontSrcUrls],
         },
